@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  Version:
+    Type: String
+Resources:
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: crypteia-demo
+      ImageUri: !Sub "589405201853.dkr.ecr.us-east-1.amazonaws.com/k8s:demo-app-${Version}"
+      FunctionUrlConfig:
+        AuthType: NONE
+      Environment:
+        Variables:
+          LD_PRELOAD: /opt/lib/libcrypteia.so
+          X_CRYPTEIA_SSM: x-crypteia-ssm-path:/myapp/envs
+          DB_URL: x-crypteia
+          MY_KEY: x-crypteia
+      MemorySize: 1792
+      PackageType: Image
+      Architectures:
+        - arm64
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: myapp/envs
+        - SSMParameterReadPolicy:
+            ParameterName: myapp/envs/*
+  

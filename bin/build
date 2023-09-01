@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+VERSION="9"
+
+docker build -t "demo-app-${VERSION}:latest" .
+
+docker tag \
+  "demo-app-${VERSION}:latest" \
+  "589405201853.dkr.ecr.us-east-1.amazonaws.com/k8s:demo-app-${VERSION}"
+
+docker push \
+  "589405201853.dkr.ecr.us-east-1.amazonaws.com/k8s:demo-app-${VERSION}"
+
+sam deploy \
+  --parameter-overrides "Version=${VERSION}" \
+  --capabilities "CAPABILITY_IAM" \
+  --image-repository "589405201853.dkr.ecr.us-east-1.amazonaws.com/k8s" \
+  --no-fail-on-empty-changeset \
+  --region us-east-1 \
+  --stack-name "crypteia-demo" \
+  --template "template.yaml" \
